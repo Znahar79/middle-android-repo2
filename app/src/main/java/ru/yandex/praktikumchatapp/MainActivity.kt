@@ -77,14 +77,13 @@ fun ChatScreen(
     modifier: Modifier = Modifier
 ) {
     val viewModel = remember { ChatViewModel() }
-    val messagesList = viewModel.messagesFlow.collectAsState(emptyList())
     val messageText = remember { mutableStateOf("") }
     val focusRequester = remember { FocusRequester() }
-    val shouldShowKeyboard by viewModel.shouldShowKeyboard.collectAsState()
+    val chatState = viewModel.chatState.collectAsState()
 
 
-    LaunchedEffect(shouldShowKeyboard) {
-        if (shouldShowKeyboard) {
+    LaunchedEffect(chatState.value.shouldShowKeyboard) {
+        if (chatState.value.shouldShowKeyboard) {
             delay(100)
             focusRequester.requestFocus()
         }
@@ -98,7 +97,7 @@ fun ChatScreen(
                 .weight(1f)
                 .padding(start = 16.dp, end = 16.dp, top = 16.dp)
         ) {
-            items(messagesList.value) { message ->
+            items(chatState.value.messages) { message ->
                 when (message) {
                     is Message.MyMessage -> MyMessageCard(message)
                     is Message.OtherMessage -> OtherMessageCard(message)
