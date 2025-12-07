@@ -1,6 +1,11 @@
+import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.joinAll
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -40,8 +45,30 @@ class ChatViewModelTest {
 
     @Test
     fun testReceiveMessage_concurrentMessages() = runTest {
-        val messagesToSend = (1..100).map { Message.MyMessage("Message $it") }
+        val messagesCount = 100
+        val messagesToSend = (1..messagesCount).map { Message.MyMessage("Message $it") }
 
-        // TODO Задание 6: допишите юнит-тест
+        val jobs = mutableListOf<Job>()
+
+        coroutineScope {
+            messagesToSend.forEach { message ->
+                val job = launch {
+                    viewModel.sendMyMessage(message.text)
+                }
+                jobs.add(job)
+            }
+
+            jobs.joinAll()
+        }
+
+        val currentMessages = viewModel.chatState.value.messages
+
+        assertEquals(messagesCount, currentMessages.size)
+
+        messagesToSend.forEach { message ->
+            assertTrue(currentMessages.any {
+                it is Message.MyMessage && it.text == message.text
+            })
+        }
     }
 }
