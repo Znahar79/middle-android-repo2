@@ -66,9 +66,15 @@ class ChatViewModelTest {
         assertEquals(messagesCount, currentMessages.size)
 
         messagesToSend.forEach { message ->
-            assertTrue(currentMessages.any {
-                it is Message.MyMessage && it.text == message.text
-            })
+            var found = false
+            for (i in 0 until currentMessages.size) {
+                if (currentMessages[i] is Message.MyMessage &&
+                    (currentMessages[i] as Message.MyMessage).text == message.text) {
+                    found = true
+                    break
+                }
+            }
+            assertTrue(found)
         }
     }
 }

@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import ru.yandex.praktikumchatapp.data.ChatRepository
 import ru.yandex.praktikumchatapp.data.ChatState
@@ -21,7 +22,9 @@ class ChatViewModel(
             while (isWithReplies) {
                 repository.getReplyMessage().collect { response ->
                     val updatedMessages = _chatState.value.messages + Message.OtherMessage(response)
-                    _chatState.value = _chatState.value.copy(messages = updatedMessages, shouldShowKeyboard = true)
+                    _chatState.update { currentState ->
+                        currentState.copy(messages = updatedMessages, shouldShowKeyboard = true)
+                    }
                 }
             }
         }
@@ -29,6 +32,8 @@ class ChatViewModel(
 
     fun sendMyMessage(messageText: String) {
         val updatedMessages = _chatState.value.messages + Message.MyMessage(messageText)
-        _chatState.value = _chatState.value.copy(messages = updatedMessages)
+        _chatState.update { currentState ->
+            currentState.copy(messages = updatedMessages)
+        }
     }
 }

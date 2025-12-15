@@ -3,6 +3,7 @@ package ru.yandex.praktikumchatapp.data
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.retryWhen
+import ru.yandex.praktikumchatapp.common.INITIAL_DELAY
 import ru.yandex.praktikumchatapp.common.powerBaseTwo
 
 class ChatRepository(
@@ -11,11 +12,9 @@ class ChatRepository(
 
     fun getReplyMessage(): Flow<String> {
         return api.getReply().retryWhen { cause, attempt ->
-            val initialDelay = 1000L
 
             if (cause is Exception) {
-                val delayTime = initialDelay * powerBaseTwo(attempt)
-                println("Повтор запроса через $delayTime мс (попытка ${attempt + 1})")
+                val delayTime = INITIAL_DELAY * powerBaseTwo(attempt)
                 delay(delayTime)
                 true
             } else {
